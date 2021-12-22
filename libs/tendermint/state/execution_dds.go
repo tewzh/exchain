@@ -81,9 +81,7 @@ func (dc *DeltaContext) reset() {
 }
 
 func (dc *DeltaContext) postApplyBlock(height int64, abciResponses *ABCIResponses, res []byte) {
-	if dc.useDeltas {
-		dc.logger.Info("Applied delta", "delta", dc.deltas, "gid", gorid.GoRId)
-	}
+	dc.logger.Info("DcDeltaInfo", "useDelta", dc.useDeltas, "delta", dc.deltas, "gid", gorid.GoRId)
 
 	// rpc
 	if dc.useDeltas && types.IsFastQuery() {
@@ -142,14 +140,14 @@ func (dc *DeltaContext) uploadData(deltas *types.Deltas) {
 
 	t1 := time.Now()
 	// compress
-	compressBytes, err := dc.compressBroker.DefaultCompress(deltaBytes)
-	if err != nil {
-		return
-	}
+	//compressBytes, err := dc.compressBroker.DefaultCompress(deltaBytes)
+	//if err != nil {
+	//	return
+	//}
 
 	t2 := time.Now()
 	// set into dds
-	if err = dc.deltaBroker.SetDeltas(deltas.Height, compressBytes); err != nil {
+	if err = dc.deltaBroker.SetDeltas(deltas.Height, deltaBytes); err != nil {
 		dc.logger.Error("Upload delta", "height", deltas.Height, "error", err)
 		return
 	}
@@ -210,15 +208,15 @@ func (dc *DeltaContext) getDeltaFromDDS() {
 
 				t1 := time.Now()
 				// uncompress
-				compressBytes, err := dc.compressBroker.UnCompress(deltaBytes)
-				if err != nil {
-					continue
-				}
+				//compressBytes, err := dc.compressBroker.UnCompress(deltaBytes)
+				//if err != nil {
+				//	continue
+				//}
 
 				t2 := time.Now()
 				// unmarshal
 				directDelta := &types.Deltas{}
-				err = directDelta.Unmarshal(compressBytes)
+				err = directDelta.Unmarshal(deltaBytes)
 				if err != nil {
 					continue
 				}
